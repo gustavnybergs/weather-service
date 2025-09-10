@@ -1,40 +1,68 @@
 package com.grupp3.weather.service;
 
 import com.grupp3.weather.model.Place;
+import com.grupp3.weather.repository.PlaceRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class PlaceService {
-    // Key = lowercase name för enkel matchning
-    private final Map<String, Place> places = new ConcurrentHashMap<>();
 
-    public List<Place> findAll() { return new ArrayList<>(places.values()); }
+    private final PlaceRepository placeRepository;
+
+    public PlaceService(PlaceRepository placeRepository) {
+        this.placeRepository = placeRepository;
+    }
+
+    public List<Place> findAll() {
+        return placeRepository.findAll();
+    }
 
     public Optional<Place> findByName(String name) {
         if (name == null) return Optional.empty();
-        return Optional.ofNullable(places.get(name.toLowerCase()));
+        return placeRepository.findByNameIgnoreCase(name);
     }
 
-    public boolean exists(String name) { return findByName(name).isPresent(); }
+    public boolean exists(String name) {
+        if (name == null) return false;
+        return placeRepository.existsByNameIgnoreCase(name);
+    }
 
-    public Place create(Place p) {
-        places.put(p.getName().toLowerCase(), p);
-        return p;
+    public Place create(Place place) {
+        return placeRepository.save(place);
     }
 
     public Optional<Place> update(String name, Place incoming) {
-        String key = name.toLowerCase();
-        if (!places.containsKey(key)) return Optional.empty();
-        Place curr = places.get(key);
-        curr.setLat(incoming.getLat());
-        curr.setLon(incoming.getLon());
-        return Optional.of(curr);
+        return placeRepository.findByNameIgnoreCase(name)
+                .map(existing -> {
+                    existing.setLat(incoming.getLat());
+                    existing.setLon(incoming.getLon());
+                    return placeRepository.save(existing);
+                });
     }
 
+    @Transactional
     public boolean delete(String name) {
-        return places.remove(name.toLowerCase()) != null;
+        if (placeRepository.existsByNameIgnoreCase(name)) {
+            placeRepository.deleteByNameIgnoreCase(name);
+            return true;
+        }
+        return false;
+    }
+
+    public Optional<Place> setFavorite(String name, boolean favorite) {
+        return placeRepository.findByNameIgnoreCase(name)
+                .map(place -> {
+                    place.setFavorite(favorite);
+                    return placeRepository.save(place);
+                });
+    }
+
+    public List<Place> findFavorites() {
+        return placeRepository.findFavorites();
     }
 }

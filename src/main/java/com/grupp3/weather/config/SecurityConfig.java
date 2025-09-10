@@ -1,6 +1,7 @@
 package com.grupp3.weather.config;
 
 import com.grupp3.weather.security.ApiKeyFilter;
+import com.grupp3.weather.security.DDoSProtectionFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +14,17 @@ public class SecurityConfig {
     public FilterRegistrationBean<ApiKeyFilter> apiKeyFilterRegistration(ApiKeyFilter filter) {
         FilterRegistrationBean<ApiKeyFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.addUrlPatterns("/*");                     // körs på alla endpoints
-        reg.setOrder(Ordered.HIGHEST_PRECEDENCE);     // tidigt i kedjan
+        reg.addUrlPatterns("/*");
+        reg.setOrder(Ordered.HIGHEST_PRECEDENCE);     // Kör först
+        return reg;
+    }
+
+    @Bean
+    public FilterRegistrationBean<DDoSProtectionFilter> ddosFilterRegistration(DDoSProtectionFilter filter) {
+        FilterRegistrationBean<DDoSProtectionFilter> reg = new FilterRegistrationBean<>();
+        reg.setFilter(filter);
+        reg.addUrlPatterns("/*");
+        reg.setOrder(Ordered.HIGHEST_PRECEDENCE + 1); // Kör efter API key filter
         return reg;
     }
 }
