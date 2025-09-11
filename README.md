@@ -83,10 +83,3 @@ curl -i http://localhost:8080/weather/Stockholm
 
 # Applikationen körs på http://localhost:8080
 ```
-
-## User stories
-
-- Som admin vill jag kunna lägga till/uppdatera/ta bort platser (namn, lat, lon), så att registret är korrekt.
-- Som användare vill jag kunna söka efter en plats via namn, så att jag snabbt hittar rätt ort.
-- Som användare vill jag hämta aktuellt väder för en vald plats, så att jag vet hur det är nu.
-- Som säkerhetsansvarig vill jag att skrivande endpoints kräver API-nyckel/token, så att obehöriga inte kan ändra data.
