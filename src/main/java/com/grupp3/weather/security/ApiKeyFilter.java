@@ -22,10 +22,12 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                                     HttpServletResponse res,
                                     FilterChain chain) throws ServletException, IOException {
 
-        // Läsning (GET) tillåts utan nyckel, skrivning kräver nyckel
+        String path = req.getRequestURI();
         boolean isWrite = !HttpMethod.GET.matches(req.getMethod());
+        boolean isFavoritesEndpoint = path.startsWith("/favorites");
 
-        if (isWrite) {
+        // Läsning (GET) tillåts utan nyckel, samt favorites-endpoints
+        if (isWrite && !isFavoritesEndpoint) {
             String provided = req.getHeader("X-API-KEY");
             if (provided == null || !provided.equals(expected)) {
                 res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
