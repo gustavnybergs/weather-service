@@ -3,8 +3,10 @@ package com.grupp3.weather.controller;
 import com.grupp3.weather.model.Place;
 import com.grupp3.weather.service.PlaceService;
 import com.grupp3.weather.service.WeatherService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -22,9 +24,11 @@ public class WeatherController {
 
     @GetMapping("/{placeName}")
     public ResponseEntity<?> current(@PathVariable String placeName) {
-        // 404 om plats saknas
-        Place p = placeService.findByName(placeName).orElse(null);
-        if (p == null) return ResponseEntity.notFound().build();
+        // 404 NOT_FOUND och fel meddelande att plats inte hittades
+        Place p = placeService.findByName(placeName).orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Place '" + placeName + "' does not exist. Try again"
+                ));
 
         // Hämta "nu-väder" från Open-Meteo
         Map<String,Object> raw = weatherService.fetchCurrent(p.getLat(), p.getLon());

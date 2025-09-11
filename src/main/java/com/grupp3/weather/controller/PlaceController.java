@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class PlaceController {
 
         // Kolla dubblett
         if (places.stream().anyMatch(p -> p.getName().equalsIgnoreCase(place.getName()))) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Place '" + place.getName() + "already exists");
         }
 
         // Lägg till och returnera 201 Created
@@ -66,7 +67,8 @@ public class PlaceController {
                     existing.setLon(updated.getLon());
                     return ResponseEntity.ok(existing);
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Place '" + name + "' does not exist, can therefor not update. Try again"));
     }
 
     // DELETE: Ta bort en plats
@@ -78,6 +80,11 @@ public class PlaceController {
         }
 
         boolean removed = places.removeIf(p -> p.getName().equalsIgnoreCase(name));
+        if (!removed) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Place '" + name + "' does not exist, can therefor for delete. Try again");
+        }
+
         return removed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }
