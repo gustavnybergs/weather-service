@@ -64,4 +64,17 @@ public class WeatherService {
 
         return fetchCurrent(latitude, longitude);
     }
+
+    public Map<String, Object> fetchLocationByName(String location) {
+        String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + location;
+        Map<String, Object> urlResponse = http.get().uri(url).retrieve().body(Map.class);
+
+        List<Map<String, Object>> results = (List<Map<String, Object>>) urlResponse.get("results");
+        if (results == null || results.isEmpty()) {
+            System.out.println("Location not found." + location);
+            return null; // add exception later
+        }
+
+        return results.get(0);
+    }
 }
