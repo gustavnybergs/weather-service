@@ -130,11 +130,4 @@ public class WeatherForecastService {
     public WeatherForecast getForecastForDate(String placeName, LocalDate date) {
         return forecastRepository.findByPlaceNameAndForecastDate(placeName, date).orElse(null);
     }
-
-    public void getWeatherAtSpecificLocation(String location) {
-        weatherService.fetchCurrentWeatherAtSpecificLocation(location);
-    }
-
-
-
 }
