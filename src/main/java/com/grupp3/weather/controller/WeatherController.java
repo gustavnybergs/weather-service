@@ -4,8 +4,10 @@ import com.grupp3.weather.model.Place;
 import com.grupp3.weather.service.PlaceService;
 import com.grupp3.weather.service.WeatherService;
 import com.grupp3.weather.service.WeatherCacheService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -28,11 +30,11 @@ public class WeatherController {
 
     @GetMapping("/{placeName}")
     public ResponseEntity<?> current(@PathVariable String placeName) {
-        // 1. Kolla om plats finns
-        Place place = placeService.findByName(placeName).orElse(null);
-        if (place == null) {
-            return ResponseEntity.notFound().build();
-        }
+        // 404 NOT_FOUND och fel meddelande att plats inte hittades
+        Place place = placeService.findByName(placeName).orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Place '" + placeName + "' does not exist. Try again"
+        ));
 
         // 2. Försök hämta från cache först
         Optional<Map<String, Object>> cachedWeather = weatherCacheService.getCachedWeather(placeName);
@@ -57,6 +59,26 @@ public class WeatherController {
         // 5. Spara i cache för framtida anrop
         weatherCacheService.cacheWeather(placeName, response);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/weatherAtLocation/{placeName}")
+    public ResponseEntity<Map<String, Object>> getWeatherAtSpecificLocation(@PathVariable String placeName) {
+        Map<String, Object> weather = weatherService.fetchCurrentWeatherAtSpecificLocation(placeName);
+        if (weather == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Location not found: " + placeName));
+        }
+
+        return ResponseEntity.ok(weather);
+    }
+
+    @GetMapping("/locationByName/{placeName}")
+    public ResponseEntity<Map<String, Object>> fetchLocationByName(@PathVariable String placeName) {
+        Map<String, Object> response = weatherService.fetchLocationByName(placeName);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(response);
     }
 
