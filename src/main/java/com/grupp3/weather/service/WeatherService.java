@@ -1,7 +1,9 @@
 package com.grupp3.weather.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +20,16 @@ public class WeatherService {
                 "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=temperature_2m,cloud_cover,wind_speed_10m",
                 lat, lon
         );
-        return http.get().uri(url).retrieve().body(Map.class);
+
+        try{
+            return http.get().uri(url).retrieve().body(Map.class);
+        } catch (Exception e){
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Weather provider is currently unavailable, try again later",
+                    e
+            );
+        }
     }
 
     /**
