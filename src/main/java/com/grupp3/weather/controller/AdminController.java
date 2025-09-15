@@ -77,4 +77,12 @@ public class AdminController {
 
         return ResponseEntity.ok(stats);
     }
+
+    /**
+    * Kontrollerar om systemet är igång
+    */
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("{\"status\": \"UP\"}");
+    }
 }
