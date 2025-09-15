@@ -94,6 +94,11 @@ public class AdminController {
         return ResponseEntity.ok("{\"status\": \"UP\"}");
     }
 
+
+    /**
+     *  Kontrollerar om appen är redo
+     * @return returnerar baserad på villkor
+     */
     @GetMapping("/ready")
     public ResponseEntity<String> ready() {
         try (Connection conn = dataSource.getConnection()) {
