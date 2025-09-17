@@ -8,6 +8,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * PlaceService - business logic-koordinator för Place-entiteter.
+ *
+ * Sitter mellan controllers och repository som "smart mellanlager".
+ * Implementerar affärsregler, validering och säkerhetslogik innan databas-access.
+ *
+ * Affärslogik inkluderar:
+ * - Input-validering: null-skydd förhindrar systemkrasch vid felaktiga API-anrop
+ * - Säker radering: kontrollerar existens först, ger tydlig feedback om resultat
+ * - Immutable names: platsnamn kan aldrig ändras för att bevara datakonsistens
+ * - State-persistence: favoritändringar sparas omedelbart för att undvika dataförlust
+ *
+ * @Transactional säkerställer databas-rollback vid fel.
+ * Används av controllers för CRUD och favorithantering.
+ */
+
 @Service
 @Transactional
 public class PlaceService {

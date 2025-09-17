@@ -9,6 +9,21 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * PlaceRepository - databas-gateway för Place-entiteter.
+ *
+ * Interface som Spring automatiskt implementerar med CRUD + custom queries.
+ * Används av flera delar: PlaceService, ScheduledWeatherService, Controllers.
+ *
+ * Custom metoder löser specifika systemkrav:
+ * - findByNameIgnoreCase(): Användarsökning ("stockholm" = "Stockholm")
+ * - existsByNameIgnoreCase(): Validering innan API-anrop för att hålla nere API anrop
+ * - findFavorites(): Hämtar platser för schemalagda väderuppdateringar
+ * - deleteByNameIgnoreCase(): Admin-cleanup av oanvända platser
+ *
+ * Spring genererar SQL automatiskt från metodnamn och @Query annotations.
+ */
+
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 

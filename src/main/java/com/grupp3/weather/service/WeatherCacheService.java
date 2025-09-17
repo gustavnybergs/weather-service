@@ -9,13 +9,38 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * WeatherCacheService - Redis-baserad cache-coordinator för väderdata prestanda.
+ *
+ * Skiljer sig från PlaceService och WeatherService genom att fungera som snabb
+ * mellanlagring istället för databas-access eller externa API-anrop.
+ *
+ * Huvudfunktioner:
+ * - getCachedWeather(String placeName): Hämta cachad väderdata → Optional för null-safety
+ * - cacheWeather(String placeName, Map data): Spara väderdata med 5 min TTL
+ * - evictCache(String placeName): Manuell cache-radering för specifik plats
+ * - clearAllCache(): Töm hela väder-cachen för admin-ändamål
+ *
+ * Cache-logik implementerar:
+ * - TTL-baserad förfallotid: Data försvinner automatiskt efter 5 minuter
+ * - Lowercase normalisering: "Stockholm" och "stockholm" blir samma cache-nyckel
+ * - JSON-serialisering: Map<String, Object> konverteras till Redis-kompatibel string
+ * - Graceful degradation: Fel i cache triggar fresh API-anrop istället för krasch
+ *
+ * Används av WeatherController för att minska Open-Meteo API-belastning.
+ * Cache miss → API-anrop, Cache hit → direkt svar utan externa anrop.
+ */
+
 @Service
 public class WeatherCacheService {
 
+    // === CACHE CONFIGURATION ===
+    private static final int CACHE_TTL_MINUTES = 5;
+    private static final Duration CACHE_TTL = Duration.ofMinutes(CACHE_TTL_MINUTES);
+    private static final String CACHE_PREFIX = "weather:";
+
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
-    private static final Duration CACHE_TTL = Duration.ofMinutes(5);
-    private static final String CACHE_PREFIX = "weather:";
 
     public WeatherCacheService(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;

@@ -3,6 +3,21 @@ package com.grupp3.weather.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * WeatherAlert-klassen är en mall för automatiska vädervarningar.
+ *
+ * Varje objekt = en komplett regel-definition (inte väderdata)
+ * Innehåller villkor: "Om temperatur < -20°C, då skicka varning"
+ * Skapas ENDAST av administratörer via API (inga automatiska objekt)
+ *
+ * 1. @Scheduled metod triggas var 30:e minut
+ * 2. updateWeatherForAllPlaces() hämtar nytt väder och sparar WeatherData
+ * 3. checkAlertsForAllPlaces() anropas EFTER väderuppdatering
+ * 4. alertRepository.findActiveAlerts() hämtar alla aktiva alerts
+ * 5. getLatestWeatherData() hämtar senaste data för varje plats
+ * 6. shouldTrigger() jämför alert-regler mot faktiska värden
+ */
+
 @Entity
 @Table(name = "weather_alerts")
 public class WeatherAlert {

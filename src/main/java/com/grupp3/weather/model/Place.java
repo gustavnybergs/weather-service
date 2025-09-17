@@ -2,6 +2,14 @@ package com.grupp3.weather.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Place-klassen är en mall/blueprint som definierar vad varje place-objekt ska innehålla.
+ *
+ * Klassen bestämmer strukturen: "Varje place-objekt MÅSTE ha id, name, lat, lon, favorite"
+ * Objekten innehåller den faktiska datan: "Stockholm", 59.3293, 18.0686, true
+ *
+ */
+
 @Entity
 @Table(name = "places")
 public class Place {

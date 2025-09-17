@@ -4,6 +4,17 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * WeatherForecast-klassen är en mall för framtida väderdata per dag.
+ *
+ * Varje objekt = en dygnssammanfattning för ett specifikt datum framåt
+ * Skiljer sig från WeatherData: datum istället för exakt tid, max/min värden istället för ögonblick
+ *
+ * Skapas när systemet hämtar 7-dagars prognos från Open-Meteo API
+ * Kopplas till Place via placeName string, precis som WeatherData
+ * Används för endpoints som /forecast/{place} för att visa kommande väder
+ */
+
 @Entity
 @Table(name = "weather_forecast")
 public class WeatherForecast {

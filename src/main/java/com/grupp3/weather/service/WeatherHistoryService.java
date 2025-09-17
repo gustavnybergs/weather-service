@@ -10,6 +10,27 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * WeatherHistoryService - databas-coordinator för permanent väderdata lagring.
+ *
+ * Skiljer sig från WeatherCacheService genom att spara väderdata permanent i PostgreSQL
+ * istället för temporär Redis-lagring.
+ *
+ * Huvudfunktioner:
+ * - fetchAndSaveWeatherData(Place place): Hämta från API → konvertera → spara i databas
+ * - getLatestWeatherData(String placeName): Senaste sparade väderdata för alert-kontroller
+ * - getWeatherHistory(String placeName, int hours): Historisk data för trendanalys
+ *
+ * Dataflöde implementerar:
+ * - API-response parsing: Extraherar temperature, wind_speed, cloud_cover från JSON
+ * - Tidskonvertering: Open-Meteo format → Java LocalDateTime för databas-kompatibilitet
+ * - Dubbel uppdatering: Sparar i databas OCH uppdaterar cache samtidigt för effektivitet
+ * - Graceful degradation: Returnerar null vid API-fel istället för systemkrasch
+ *
+ * Används av ScheduledWeatherService för automatisk historikbyggnad.
+ * Databas-lagring → permanent, Cache-lagring → 5 minuter.
+ */
+
 @Service
 public class WeatherHistoryService {
 

@@ -159,3 +159,51 @@ GRANT ALL PRIVILEGES ON DATABASE weather_db TO weather_user;
   "active": true
 }
 ```
+
+
+Reflektion: Vad har vi lärt oss?
+Webbtjänster
+Vi har lärt oss att bygga en robust webbtjänst som:
+
+Hanterar externa API:er med felhantering och resilience
+Implementerar caching för bättre prestanda och användarupplevelse
+Följer REST-principer med semantiska endpoints och HTTP-statuskoder
+Hanterar async/schemalagda processer för bakgrundsuppdateringar
+Implementerar säkerhetslager (autentisering, rate limiting, validering)
+
+Versionshantering
+Genom GitHub har vi övat på:
+
+Branch-strategier för parallell utveckling
+Pull Request-workflows för kodgranskning
+Issue tracking för buggar och feature requests
+Project management för sprint-planering
+Commit discipline med beskrivande meddelanden
+
+Samarbete
+Vi har utvecklat färdigheter inom:
+
+Kodgranskning genom pull requests
+Dokumentation för kunskapsöverföring
+API-design för konsistens mellan utvecklare
+Konfliktlösning vid merge-konflikter
+Kommunikation kring tekniska beslut
+
+Tekniska lärdomar
+
+Spring Boot ecosystem: Förstått dependency injection, auto-configuration
+Database design: Normalisering, relationer, index-optimering
+Caching strategies: Redis för performance-förbättringar
+External integrations: Hantering av third-party APIs
+Security mindset: Implementerat flera säkerhetslager
+Monitoring: Logging och error tracking för produktion
+
+Utmaningar vi löste
+
+Rate limiting - Implementerade Bucket4j för att skydda mot överbelastning
+Cache invalidation - Balanserade prestanda mot data-fräschhet
+Error resilience - Graceful degradation när externa tjänster är nere
+Data consistency - Transaktionshantering vid komplexa operationer
+Security layering - Flera säkerhetsnivåer utan att påverka UX
+
+Projektet gav oss verklig erfarenhet av hela utvecklingscykeln från planering till deployment.

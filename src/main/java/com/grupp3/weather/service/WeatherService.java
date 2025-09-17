@@ -8,8 +8,35 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * WeatherService - external API-integrator och gateway till Open-Meteo väder-API.
+ *
+ * Skiljer sig från PlaceService genom att kommunicera med externa API:er via HTTP-anrop
+ * istället för intern databas.
+ *
+ * Huvudfunktioner:
+ * - fetchCurrent(double lat, double lon): Direkta väderanrop med koordinater → aktuellt väder
+ * - fetchCurrentWeatherAtSpecificLocation(String location): Geocoding + väder i ett flöde
+ * - fetchForecast(double lat, double lon): 7-dagars prognos via koordinater
+ * - fetchLocationByName(String location): Platsökning via Open-Meteo geocoding API
+ *
+ * Använder RestClient för HTTP-requests och konverterar JSON-response till Map<String, Object>
+ * där Object hanterar blandade datatyper från API:et (String, Double, Integer).
+ * Felhantering kastar SERVICE_UNAVAILABLE vid externa API-fel.
+ */
+
 @Service
 public class WeatherService {
+
+    // === OPEN-METEO API CONFIGURATION ===
+    private static final String OPEN_METEO_BASE_URL = "https://api.open-meteo.com/v1";
+    private static final String GEOCODING_BASE_URL = "https://geocoding-api.open-meteo.com/v1";
+
+    // === API PARAMETERS ===
+    private static final String CURRENT_WEATHER_PARAMS = "current=temperature_2m,cloud_cover,wind_speed_10m";
+    private static final String FORECAST_PARAMS = "daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=auto";
+    private static final int DEFAULT_FORECAST_DAYS = 7;
+
     private final RestClient http = RestClient.create();
 
     /**
@@ -17,8 +44,8 @@ public class WeatherService {
      */
     public Map<String, Object> fetchCurrent(double lat, double lon) {
         String url = String.format(
-                "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=temperature_2m,cloud_cover,wind_speed_10m",
-                lat, lon
+                "%s/forecast?latitude=%s&longitude=%s&%s",
+                OPEN_METEO_BASE_URL, lat, lon, CURRENT_WEATHER_PARAMS
         );
 
         try{
@@ -37,8 +64,8 @@ public class WeatherService {
      */
     public Map<String, Object> fetchForecast(double lat, double lon) {
         String url = String.format(
-                "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=auto&forecast_days=7",
-                lat, lon
+                "%s/forecast?latitude=%s&longitude=%s&%s&forecast_days=%d",
+                OPEN_METEO_BASE_URL, lat, lon, FORECAST_PARAMS, DEFAULT_FORECAST_DAYS
         );
         return http.get().uri(url).retrieve().body(Map.class);
     }
@@ -60,7 +87,7 @@ public class WeatherService {
      * @return
      */
     public Map<String, Object> fetchCurrentWeatherAtSpecificLocation(String location)  {
-        String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + location;
+        String url = GEOCODING_BASE_URL + "/search?name=" + location;
         Map<String, Object> urlResponse = http.get().uri(url).retrieve().body(Map.class);
 
         List<Map<String, Object>> results = (List<Map<String,Object>>) urlResponse.get("results");
@@ -77,7 +104,7 @@ public class WeatherService {
     }
 
     public Map<String, Object> fetchLocationByName(String location) {
-        String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + location;
+        String url = GEOCODING_BASE_URL + "/search?name=" + location;
         Map<String, Object> urlResponse = http.get().uri(url).retrieve().body(Map.class);
 
         List<Map<String, Object>> results = (List<Map<String, Object>>) urlResponse.get("results");
