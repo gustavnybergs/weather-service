@@ -95,4 +95,34 @@ public class WeatherController {
         weatherCacheService.clearAllCache();
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{placeName}/history")
+    public ResponseEntity<?> history(@PathVariable String placeName, @RequestParam(defaultValue = "7") int days){
+
+        // 1. Kolla om plats finns
+        Place place = placeService.findByName(placeName).orElse(null);
+        if (place == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 2. Begränsar till att bara kolla historia för 7 eller 30 dagar
+        if (days != 7 && days != 30) {
+            return ResponseEntity.badRequest().body(
+            Map.of("error", "only 7 och 30 days are allowed")
+            );
+        }
+
+        // 3. Hämta historiska data
+        Map<String, Object> raw = weatherService.fetchHistory(place.getLat(), place.getLon(), days);
+
+        // 4. Forma svar
+        Map<String, Object> response = Map.of(
+                "place",  Map.of("name", place.getName(), "lat", place.getLat(), "lon", place.getLon()),
+                "source", "open-meteo",
+                "days", days,
+                "data", raw.get("daily")
+        );
+        return ResponseEntity.ok(response);
+    }
 }
+

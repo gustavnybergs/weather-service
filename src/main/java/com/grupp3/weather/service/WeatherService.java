@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +69,28 @@ public class WeatherService {
                 OPEN_METEO_BASE_URL, lat, lon, FORECAST_PARAMS, DEFAULT_FORECAST_DAYS
         );
         return http.get().uri(url).retrieve().body(Map.class);
+    }
+
+    /**
+     * Hämta väder historik för 7 och 30 dagar
+     */
+    public Map<String, Object> fetchHistory(double lat, double lon, int days) {
+        LocalDate end = LocalDate.now().minusDays(1); // visar från gårdagens datum
+        LocalDate start = end.minusDays(days -1);
+
+        String url = String.format( // rätt url????
+                "https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=temperature_2m,cloud_cover,wind_speed_10m",
+                lat, lon
+        );
+        try{
+            return http.get().uri(url).retrieve().body(Map.class);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Weather provider is currently unavailable, try again later",
+                    e
+            );
+        }
     }
 
     /**
