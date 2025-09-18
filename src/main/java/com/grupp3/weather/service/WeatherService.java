@@ -78,7 +78,7 @@ public class WeatherService {
     }
 
     /**
-     *  Hämtar en specifik plats beroende på user:ens input och fetchar vädret på platsen
+     *  Hämtar en specifik plats beroende på user:ens input samt fetchar vädret på platsen
      * @param location
      * @return
      */
@@ -97,6 +97,12 @@ public class WeatherService {
 
         return fetchCurrent(latitude, longitude);
     }
+
+    /**
+     *  Hämtar en plats via namn
+     * @param location
+     * @return returns en bad request om staden inte finns eller stadens namn
+     */
 
     public Map<String, Object> fetchLocationByName(String location) {
         String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + location;
