@@ -42,7 +42,9 @@ export type ForecastResponse = {
 // Favorit-check (om en plats är favorit)
 export type FavCheck = {
     place: string;
-    favorite: boolean;
+    is_favorite: boolean;
+    actual_place_name?: string;
+    coordinates?: {lat: number, lon: number};
 };
 
 // Backend-svar för lista av favoriter
