@@ -105,8 +105,7 @@ public class WeatherService {
 
         List<Map<String, Object>> results = (List<Map<String, Object>>) urlResponse.get("results");
         if (results == null || results.isEmpty()) {
-            System.out.println("Location not found." + location);
-            return null; // add exception later
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location not found." + location);
         }
 
         return results.get(0);
