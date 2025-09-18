@@ -166,6 +166,7 @@ class PlaceServiceTest {
         assertThat(placeService.exists("NonExistent")).isFalse();
     }
 
+    // detta test behöver fixas
     @Test
     @DisplayName("Null-hantering ska fungera korrekt")
     void nullHandling_ShouldWorkCorrectly() {

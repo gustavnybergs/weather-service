@@ -19,6 +19,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+// OBS FIXA TESTER
+
 @ExtendWith(MockitoExtension.class)
 class FavoritesControllerTest {
 
