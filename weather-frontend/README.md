@@ -61,4 +61,9 @@ in a short-and-sweet format, as well as constantly using branches and keeping ou
 Our co-operation as a team has been great, as everyone was given a task to do via our Gant schedule and Kanban board. Each of us set out to get it done, without fuss. We aided each other when requested,
 to the best of our ability and we can proudly deliver this program.
 
+## Vad jag har lärt mig - Parmida ##
+Jag har mer förstått samarbetet och kommunikationen vid webbtjänster och vad som behövs först en webbtjänst ska fungera. 
+Jag har nu fattat hela versionshantering och inser varför de är så bra att ha det. 
+Samarbetet gick bra, hade bra kommunikation!
+
 
