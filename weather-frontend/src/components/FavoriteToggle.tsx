@@ -25,7 +25,7 @@ export default function FavoriteToggle({ place }: { place: string }) {
         if (isFav === null) return;
         setErr("");
         setIsLoading(true);
-        
+
         try {
             if (isFav) {
                 // Ta bort favorit
@@ -36,12 +36,12 @@ export default function FavoriteToggle({ place }: { place: string }) {
                 await apiPut(`/favorites/${encodeURIComponent(place)}`);
                 setIsFav(true); // Uppdatera lokalt state direkt
             }
-            
+
             // Dubbelkolla genom att hämta status från backend
             setTimeout(() => {
                 refresh();
             }, 500);
-            
+
         } catch (error) {
             setErr("Could not update favorite status ❌");
             // Återställ state vid fel

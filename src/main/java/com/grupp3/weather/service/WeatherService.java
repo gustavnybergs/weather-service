@@ -105,7 +105,7 @@ public class WeatherService {
     }
 
     /**
-     *  Hämtar en specifik plats beroende på user:ens input och fetchar vädret på platsen
+     *  Hämtar en specifik plats beroende på user:ens input samt fetchar vädret på platsen
      * @param location
      * @return
      */
@@ -115,8 +115,7 @@ public class WeatherService {
 
         List<Map<String, Object>> results = (List<Map<String,Object>>) urlResponse.get("results");
         if (results == null || results.isEmpty()) {
-            System.out.println("Location not found." + location);
-            return null;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location not found " + location);
         }
 
         Map<String, Object> firstResult = results.get(0);
@@ -126,14 +125,19 @@ public class WeatherService {
         return fetchCurrent(latitude, longitude);
     }
 
+    /**
+     *  Hämtar en plats via namn
+     * @param location
+     * @return returns en bad request om staden inte finns eller stadens namn
+     */
+
     public Map<String, Object> fetchLocationByName(String location) {
         String url = GEOCODING_BASE_URL + "/search?name=" + location;
         Map<String, Object> urlResponse = http.get().uri(url).retrieve().body(Map.class);
 
         List<Map<String, Object>> results = (List<Map<String, Object>>) urlResponse.get("results");
         if (results == null || results.isEmpty()) {
-            System.out.println("Location not found." + location);
-            return null; // add exception later
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location not found " + location);
         }
 
         return results.get(0);
