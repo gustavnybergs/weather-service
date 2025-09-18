@@ -10,6 +10,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * WeatherDataRepository - tidsbaserad databas-extraktor för växande väderhistorik.
+ *
+ * Databasen fylls på var 30:e minut med nya WeatherData-objekt från Open-Meteo API.
+ * Interface hjälper extrahera rätt information från tusentals historiska poster.
+ *
+ * Samma data används för både:
+ * - Aktuell alert-kontroll: findLatestByPlaceName() hämtar senaste för regelkontroll
+ * - Historisk analys: findByPlaceNameAndObservationTimeBetween() för trendrapporter
+ *
+ * Tidsbaserade queries optimerade för växande datamassa:
+ */
+
 @Repository
 public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> {
 
@@ -21,7 +34,7 @@ public interface WeatherDataRepository extends JpaRepository<WeatherData, Long> 
     @Query("SELECT w FROM WeatherData w WHERE w.placeName = :placeName ORDER BY w.observationTime DESC LIMIT 1")
     Optional<WeatherData> findLatestByPlaceName(@Param("placeName") String placeName);
 
-    // Hitta väderdata inom ett tidsintervall
+    // Hitta väderdata inom ett tidsintervall, nyast först
     @Query("SELECT w FROM WeatherData w WHERE w.placeName = :placeName AND w.observationTime BETWEEN :start AND :end ORDER BY w.observationTime DESC")
     List<WeatherData> findByPlaceNameAndObservationTimeBetween(
             @Param("placeName") String placeName,

@@ -12,9 +12,38 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ScheduledWeatherService - systemdirigent för automatisk väderdata-uppdatering och alert-hantering.
+ *
+ * Skiljer sig från andra services genom att köra automatiska bakgrundsprocesser
+ * istället för att reagera på användarförfrågningar.
+ *
+ * Huvudfunktioner:
+ * - updateWeatherForAllPlaces(): Automatisk uppdatering var 30:e minut för ENDAST favoriter
+ * - checkAlertsForAllPlaces(): Kontrollera väderalerts mot aktuell data efter uppdatering
+ * - cleanupOldData(): Daglig rensning kl 02:00 av gamla prognoser och buckets
+ * - triggerManualUpdate(): Admin-triggered omedelbar uppdatering via endpoint
+ *
+ * Batch-processing implementerar:
+ * - Per-plats error isolation: Ett API-fel stoppar inte uppdatering av andra platser
+ * - API-anrops frekvens: 2 anrop per favoritplats (current + forecast) var 30:e minut
+ * - Paus mellan platser: 1 sekund delay för att inte överbelasta Open-Meteo API
+ * - Detaljerad loggning: Framgång/fel-statistik per körning för diagnostik
+ *
+ * Alert-system koordinerar WeatherAlert-definitioner mot faktisk väderdata.
+ * Använder PlaceService, WeatherHistoryService, WeatherForecastService som dependencies.
+ * Enda klassen som automatiskt uppdaterar favoritplatser - andra services är reaktiva.
+ */
+
 @Service
 public class ScheduledWeatherService {
 
+    // === SCHEDULING CONSTANTS ===
+    private static final int WEATHER_UPDATE_INTERVAL_MS = 30 * 60 * 1000;  // fixedRate
+    private static final int API_CALL_DELAY_MS = 1000;                     // Thread.sleep
+    private static final int STARTUP_DELAY_MS = 30000;                     // initialDelay
+
+    // === ALERT THRESHOLDS ===
     private final PlaceService placeService;
     private final WeatherHistoryService weatherHistoryService;
     private final WeatherForecastService forecastService;
@@ -37,7 +66,7 @@ public class ScheduledWeatherService {
      * Schemalagd uppdatering var 30:e minut
      * Hämtar både aktuellt väder och prognoser för alla registrerade platser
      */
-    @Scheduled(fixedRate = 30 * 60 * 1000) // 30 minuter i millisekunder
+    @Scheduled(fixedRate = WEATHER_UPDATE_INTERVAL_MS) // 30 minuter i millisekunder
     public void updateWeatherForAllPlaces() {
         List<Place> favoritePlaces = placeService.findFavorites();
 
@@ -66,7 +95,7 @@ public class ScheduledWeatherService {
                     System.err.println("✗ Failed to update current weather for " + place.getName());
                 }
 
-                Thread.sleep(1000);
+                Thread.sleep(API_CALL_DELAY_MS);
 
                 // Uppdatera prognoser
                 List<WeatherForecast> forecasts = forecastService.fetchAndSaveForecast(place);
@@ -79,7 +108,7 @@ public class ScheduledWeatherService {
                     System.err.println("✗ Failed to update forecast for " + place.getName());
                 }
 
-                Thread.sleep(1000);
+                Thread.sleep(API_CALL_DELAY_MS);
 
             } catch (Exception e) {
                 errorCount++;
@@ -229,7 +258,7 @@ public class ScheduledWeatherService {
     /**
      * Startup-metod som kör en gång när applikationen startar
      */
-    @Scheduled(initialDelay = 30000, fixedRate = Long.MAX_VALUE)
+    @Scheduled(initialDelay = STARTUP_DELAY_MS, fixedRate = Long.MAX_VALUE)
     public void initialWeatherUpdate() {
         System.out.println("[" + LocalDateTime.now() + "] Running initial weather and forecast update...");
         updateWeatherForAllPlaces();

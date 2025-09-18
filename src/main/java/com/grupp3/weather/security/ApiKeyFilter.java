@@ -11,6 +11,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * ApiKeyFilter - autentisering-portier för admin-endpoints och skrivoperationer.
+ *
+ * Skiljer sig från andra säkerhetslager genom att fokusera på API-key validering
+ * istället för rate limiting eller DDoS detection.
+ *
+ * Huvudfunktion:
+ * - doFilterInternal(): Kontrollera om request kräver API-key och validera X-API-KEY header
+ *
+ * Säkerhetsregler implementerar:
+ * - Öppen läsning: Alla GET requests tillåts utan API-key (bara hämta data)
+ * - Skyddad skrivning: POST/PUT/DELETE kräver API-key (ändra systemet)
+ * - Admin-skydd: Alla /admin/* endpoints kräver API-key oavsett HTTP-metod
+ * - Användarundantag: /favorites/* endpoints tillåts för vanliga användare
+ *
+ * Filter-kedja position: FÖRSTA filter (Ordered.HIGHEST_PRECEDENCE) för tidig blockering.
+ * Unauthorized requests får HTTP 401 och når aldrig Controller eller DDoSProtectionFilter.
+ * Läser API-key från application.properties för säker konfiguration.
+ */
+
 @Component
 public class ApiKeyFilter extends OncePerRequestFilter {
 

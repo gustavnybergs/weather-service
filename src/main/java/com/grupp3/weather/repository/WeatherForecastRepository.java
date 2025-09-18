@@ -10,6 +10,21 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * WeatherForecastRepository - datumbaserad prognoshämtare för framtida väderdata.
+ *
+ * Fokuserar på LocalDate (bara datum) istället för LocalDateTime (exakt tid).
+ * Prognoser är per dag och byts ut när nya hämtas, till skillnad från WeatherData som samlas historiskt.
+ *
+ * Huvudanvändning:
+ * - findByPlaceNameAndForecastDate(): Specifik dag ("Hur blir fredagen?")
+ * - findForecastsForNextDays(): X-dagars prognos framåt i kronologisk ordning
+ * - deleteOldForecasts(): Rensning av gårdagens prognoser (ej historisk data)
+ *
+ * Används av ForecastController och ScheduledWeatherService för att visa/uppdatera
+ * 7-dagars prognoser från Open-Meteo API.
+ */
+
 @Repository
 public interface WeatherForecastRepository extends JpaRepository<WeatherForecast, Long> {
 

@@ -9,6 +9,21 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * WeatherAlertRepository - regel-filtrare och prioriterare för alert-systemet.
+ *
+ * Alla alerts lagras permanent i weather_alerts tabellen i PostgreSQL-databasen.
+ * Skapas endast av administratörer via POST /admin/alerts, raderas inte automatiskt.
+ *
+ * Filtreringen bygger på tre huvudkategorier:
+ * - Status: active=true/false (påslagna vs avstängda)
+ * - Typ: alertType="temperature/wind_speed/precipitation"
+ * - Prioritet: severity="critical/high/medium/low" med CASE-sortering
+ *
+ * Används av ScheduledWeatherService för att hitta "vilka regler ska kollas just nu"
+ * och av admin-controllers för hantering med prioritetsordning.
+ */
+
 @Repository
 public interface WeatherAlertRepository extends JpaRepository<WeatherAlert, Long> {
 

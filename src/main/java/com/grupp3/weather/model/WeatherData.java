@@ -3,6 +3,23 @@ package com.grupp3.weather.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * WeatherData-klassen är en mall för tidsstämplade väderrapporter.
+ *
+ * Varje objekt är en ögonblicksbild av vädret vid en specifik tidpunkt
+ * NYA objekt skapas var 30:e minut
+ * Kopplas till Place via placeName string, inte databas-relation
+ * Varje WeatherData-objekt har ett placeName fält som innehåller samma namn som Place-objektet:
+ *
+ * Exempel: 3 WeatherData-objekt för "Stockholm" med olika tider och temperaturer:
+ *
+ * WeatherData kl10 = new WeatherData("Stockholm", 59.3293, 18.0686, 15.0, ...);
+ * WeatherData kl1030 = new WeatherData("Stockholm", 59.3293, 18.0686, 16.0, ...);
+ * WeatherData kl11 = new WeatherData("Stockholm", 59.3293, 18.0686, 14.0, ...);
+ *
+ * Bygger upp historisk data för trendanalys och alert-system
+ */
+
 @Entity
 @Table(name = "weather_data")
 public class WeatherData {

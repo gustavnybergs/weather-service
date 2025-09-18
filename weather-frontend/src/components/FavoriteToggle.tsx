@@ -59,10 +59,10 @@ export default function FavoriteToggle({ place }: { place: string }) {
                 onClick={toggle}
                 disabled={isLoading}
                 className={`px-3 py-2 rounded text-white ${
-                    isLoading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : isFav
-                            ? "bg-red-300 hover:bg-red-500"
+                    isLoading 
+                        ? "bg-gray-400 cursor-not-allowed" 
+                        : isFav 
+                            ? "bg-red-300 hover:bg-red-500" 
                             : "bg-blue-400 hover:bg-blue-600"
                 }`}
             >

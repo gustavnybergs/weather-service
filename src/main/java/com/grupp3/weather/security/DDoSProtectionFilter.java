@@ -14,9 +14,37 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * DDoSProtectionFilter - säkerhetsdetektiv för misstänkt beteende och DDoS-attacker.
+ *
+ * Skiljer sig från ApiKeyFilter genom att analysera användarnas beteendemönster
+ * istället för bara kolla API-key legitimation.
+ *
+ * Huvudfunktioner:
+ * - doFilterInternal(): Multi-layer säkerhetsanalys av inkommande requests
+ * - isSuspiciousBehavior(): Upptäck bots, överdriven användning och attackmönster
+ * - blockIP(): 15-minuters IP-ban för misstänkta adresser med automatisk upphävning
+ * - getClientIpAddress(): Smart IP-detection genom proxy-headers (X-Forwarded-For)
+ *
+ * Multi-layer detection implementerar:
+ * - DDoS-tröskelvärde: RateLimitingService kontroll (över 100 requests/minut)
+ * - User-Agent analys: Upptäck bots, crawlers, curl och misstänkta patterns
+ * - Upprepat misstänkt beteende: Spåra IPs med 10+ rate limit överträdelser
+ * - Rate limiting per endpoint-typ: ADMIN (10/min), WEATHER (30/min), PLACES_WRITE (20/min)
+ *
+ * Filter-kedja position: ANDRA filter efter ApiKeyFilter för fokus på authorized requests.
+ * IP-blockering är temporär med 15min TTL och automatisk rensning vid upphörning.
+ * Integrerar med RateLimitingService för konsekvent säkerhetsstrategi.
+ */
+
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1) // Kör efter API key filter
 public class DDoSProtectionFilter extends OncePerRequestFilter {
+
+    // === IP BLOCKING CONFIGURATION ===
+    private static final int BLOCK_DURATION_MINUTES = 15; // 15 min
+    private static final long BLOCK_DURATION_MS = BLOCK_DURATION_MINUTES * 60 * 1000;
+    private static final int BLOCK_DURATION_SECONDS = BLOCK_DURATION_MINUTES * 60;
 
     private final RateLimitingService rateLimitingService;
 
@@ -24,7 +52,6 @@ public class DDoSProtectionFilter extends OncePerRequestFilter {
     private final ConcurrentHashMap<String, AtomicInteger> suspiciousIPs = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> blockedIPs = new ConcurrentHashMap<>();
 
-    private static final long BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minuter
 
     public DDoSProtectionFilter(RateLimitingService rateLimitingService) {
         this.rateLimitingService = rateLimitingService;
@@ -42,7 +69,7 @@ public class DDoSProtectionFilter extends OncePerRequestFilter {
         // 1. Kolla om IP är blockerad
         if (isBlocked(clientIp)) {
             response.setStatus(429); // Too Many Requests
-            response.setHeader("Retry-After", "900"); // 15 minuter
+            response.setHeader("Retry-After", String.valueOf(BLOCK_DURATION_SECONDS)); // 15 minuter
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"IP temporarily blocked due to suspicious activity\"}");
             return;
