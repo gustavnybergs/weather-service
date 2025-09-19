@@ -12,6 +12,28 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * WeatherController - REST API-gateway för väderdata-hämtning från externa källor.
+ *
+ * Skiljer sig från andra controllers genom att fokusera på aktuell väderdata
+ * istället för databas-CRUD eller admin-funktioner.
+ *
+ * Huvudfunktioner:
+ * - current(String placeName): Hämta väder för favoritplats => kollar cache först
+ * - getWeatherAtSpecificLocation(String placeName): Sök väder för vilken plats som helst
+ * - fetchLocationByName(String placeName): Geocoding för platskoordinater
+ * - clearCache(): Admin-endpoints för cache-rensning
+ *
+ * Cache-strategi implementerar:
+ * - Cache hit: Returnera sparad data inom 5 minuter (snabbt)
+ * - Cache miss: Hämta från Open-Meteo API → spara i cache → returnera
+ * - Favorit-optimering: Endast favoritplatser använder cache för prestanda
+ * - Live-sökning: Fri sökning går direkt till API utan cache-lagring
+ *
+ * Används av frontend för väder-widgets och PlaceService för favoritvalidering.
+ * Samarbetar med WeatherService för API-anrop och WeatherCacheService för prestanda.
+ */
+
 @RestController
 @RequestMapping("/weather")
 public class WeatherController {
